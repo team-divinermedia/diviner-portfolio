@@ -316,7 +316,8 @@ const normalizeMediaUrl = (url) => {
       const idFromPath = parsed.pathname.split("/d/")[1]?.split("/")[0];
       const fileId = idFromQuery || idFromPath;
       if (fileId) {
-        return `https://drive.google.com/uc?export=download&id=${fileId}`;
+        // Use lh3.googleusercontent.com for direct image embedding (avoids 302 redirects and 403 issues)
+        return `https://lh3.googleusercontent.com/d/${fileId}`;
       }
     }
     return url;
@@ -455,16 +456,16 @@ function MasonryItemCard({ item, isLatest, liveStatus, onOpen, onRegisterView })
             </div>
           </div>
         ) : (
-          <div className="relative w-full aspect-[4/5] overflow-hidden bg-slate-100">
+          <div className="relative w-full overflow-hidden bg-slate-100">
             <img
               src={normalizeMediaUrl(item.imageUrl)}
               alt={item.title}
-              className="h-full w-full object-cover"
+              className="w-full h-auto block"
               loading="lazy"
               referrerPolicy="no-referrer"
               onError={handleImgError}
             />
-            {item.layout === "carousel" && (
+            {(item.layout === "carousel" || (item.slides && item.slides.length > 1)) && (
               <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-slate-900/80 px-2 py-1 text-[10px] font-medium text-slate-50">
                 <ImageIcon className="h-3 w-3" />
                 <span>Carousel preview</span>
@@ -614,8 +615,8 @@ function MobileFeedItem({ item, onOpen, onRegisterView }) {
     item.type === "story"
       ? "w-full aspect-[9/16]"
       : item.layout === "carousel"
-        ? "aspect-[4/5]"
-        : "aspect-[4/5]";
+        ? ""
+        : "";
 
   const handleClick = () => {
     onRegisterView?.(item.id);
@@ -668,7 +669,7 @@ function MobileFeedItem({ item, onOpen, onRegisterView }) {
           <img
             src={mediaSrc}
             alt={item.title}
-            className="h-full w-full object-cover"
+            className={item.type === "story" ? "h-full w-full object-cover" : "w-full h-auto block"}
             loading="lazy"
             referrerPolicy="no-referrer"
             onError={handleImgError}
@@ -871,10 +872,10 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
   if (!item) return null;
 
   const isReel = item.type === "reel";
-  const isCarousel = item.layout === "carousel";
-  const isStory = item.layout === "story";
+  const isCarousel = item.layout === "carousel" || (item.slides && item.slides.length > 1);
+  const isStory = item.type === "story";
 
-  const slideCount = isCarousel ? 5 : isStory ? 4 : 1;
+  const slideCount = item.slides?.length || 1;
 
   const handlePrev = () => {
     if (slideCount <= 1) return;
@@ -906,7 +907,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
   });
   const mediaSrc = isReel
     ? normalizeMediaUrl(item.videoUrl || item.imageUrl)
-    : normalizeMediaUrl(item.imageUrl);
+    : normalizeMediaUrl(item.slides?.[currentSlide] || item.imageUrl);
   const handleImgError = (e) => {
     if (e.currentTarget.dataset.fallback) return;
     e.currentTarget.dataset.fallback = "true";
@@ -1305,42 +1306,27 @@ function App() {
   const [activeMobileFilter, setActiveMobileFilter] = useState("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const [items, setItems] = useState(() => {
-    if (typeof window !== "undefined") {
-      const stored = window.localStorage.getItem("dm_live_items");
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch {
-          // ignore parse error and fall back to seed
-        }
-      }
-    }
-    return MOCK_ITEMS;
-  });
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem("dm_live_items", JSON.stringify(items));
-    }
-  }, [items]);
-
-  const [driveItems, setDriveItems] = useState([]);
-
-  useEffect(() => {
-    async function loadDriveFeed() {
+    async function fetchFeed() {
       try {
-        const res = await fetch("/api/portfolio-feed-placeholder.json");
-        if (!res.ok) return;
+        const res = await fetch("https://diviner-portfolio.vercel.app/api/portfolio-feed");
+        if (!res.ok) throw new Error("Failed to fetch");
         const data = await res.json();
         if (Array.isArray(data.items)) {
-          setDriveItems(data.items);
+          setItems(data.items);
         }
+        setLoading(false);
       } catch (err) {
-        console.error("Failed to fetch Drive feed", err);
+        console.error(err);
+        setError("Failed to load feed");
+        setLoading(false);
       }
     }
-    loadDriveFeed();
+    fetchFeed();
   }, []);
 
   const handleAddItem = (newItem) => {
@@ -1351,13 +1337,7 @@ function App() {
   const [showAllCategories, setShowAllCategories] = useState(false);
   const [timeFilter, setTimeFilter] = useState("all");
   const [sortMode, setSortMode] = useState("latest");
-  const [viewCounts, setViewCounts] = useState(() => {
-    const initial = {};
-    MOCK_ITEMS.forEach((item) => {
-      initial[item.id] = item.views || 0;
-    });
-    return initial;
-  });
+  const [viewCounts, setViewCounts] = useState({});
   const [activeItem, setActiveItem] = useState(null);
 
   const registerView = (id) => {
@@ -1376,34 +1356,18 @@ function App() {
     [items, viewCounts]
   );
 
-  const combinedItems = useMemo(() => {
-    const original = itemsWithViews || [];
-    const fromDrive = driveItems || [];
-
-    // Override by ID (Drive wins if IDs clash)
-    const map = new Map();
-    original.forEach((i) => map.set(String(i.id), i));
-    fromDrive.forEach((i) => {
-      map.set(String(i.id), {
-        ...i,
-        totalViews: i.views ?? 0,
-      });
-    });
-    return Array.from(map.values());
-  }, [itemsWithViews, driveItems]);
-
   const latestItemId = useMemo(() => {
-    if (!combinedItems.length) return null;
-    return combinedItems.reduce((latest, current) =>
+    if (!itemsWithViews.length) return null;
+    return itemsWithViews.reduce((latest, current) =>
       new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest
     ).id;
-  }, [combinedItems]);
+  }, [itemsWithViews]);
 
   const liveStatusLabel = useMemo(() => getLiveStatusLabel(), []);
 
   const { allCategories, topCategories } = useMemo(() => {
     const counts = {};
-    combinedItems.forEach((item) => {
+    itemsWithViews.forEach((item) => {
       counts[item.category] = (counts[item.category] || 0) + 1;
     });
     const allCategoriesArr = Object.keys(counts).sort();
@@ -1411,10 +1375,10 @@ function App() {
       .sort((a, b) => counts[b] - counts[a])
       .slice(0, 5);
     return { allCategories: allCategoriesArr, topCategories: topCategoriesArr };
-  }, [combinedItems]);
+  }, [itemsWithViews]);
 
   const filteredItems = useMemo(() => {
-    let items = [...combinedItems];
+    let items = [...itemsWithViews];
 
     if (activeCategory !== "all") {
       items = items.filter((item) => item.category === activeCategory);
@@ -1456,7 +1420,7 @@ function App() {
     });
 
     return items;
-  }, [combinedItems, activeCategory, timeFilter, sortMode]);
+  }, [itemsWithViews, activeCategory, timeFilter, sortMode]);
 
   const reels = useMemo(
     () => filteredItems.filter((item) => item.type === "reel"),
@@ -1503,68 +1467,86 @@ function App() {
           onSortModeChange={setSortMode}
         />
 
-        {/* Desktop split layout */}
-        <div className="hidden gap-6 lg:flex">
-          {/* Left: Masonry grid */}
-          <section className="w-2/3">
-            <div className="columns-1 gap-4 sm:columns-2 xl:columns-3">
-              {desktopMasonryItems.map((item) => (
-                <MasonryItemCard
+        {loading && (
+          <div className="py-20 text-center">
+            <p className="text-sm font-medium text-slate-500">Loading live feed...</p>
+          </div>
+        )}
+
+        {!loading && items.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-sm font-medium text-slate-500">
+              Live feed is warming up. Drop a design into the Google Drive folders and refresh.
+            </p>
+          </div>
+        )}
+
+        {!loading && items.length > 0 && (
+          <>
+            {/* Desktop split layout */}
+            <div className="hidden gap-6 lg:flex">
+              {/* Left: Masonry grid */}
+              <section className="w-2/3">
+                <div className="columns-1 gap-4 sm:columns-2 xl:columns-3">
+                  {desktopMasonryItems.map((item) => (
+                    <MasonryItemCard
+                      key={item.id}
+                      item={item}
+                      isLatest={item.id === latestItemId}
+                      liveStatus={liveStatusLabel}
+                      onOpen={setActiveItem}
+                      onRegisterView={registerView}
+                    />
+                  ))}
+                </div>
+              </section>
+
+              {/* Right: Sticky reels feed - visually distinct with aqua stroke */}
+              <aside className="sticky top-24 flex h-[calc(100vh-8rem)] w-1/3 flex-col gap-3 overflow-y-auto rounded-3xl border border-cyan-400/60 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950/95 p-3 shadow-xl shadow-cyan-500/30">
+                <div className="mb-1 flex items-center justify-between px-1">
+                  <div>
+                    <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-300">
+                      Reels & Video Room
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      Vertical-first edits, pinned in a dedicated lane.
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-200">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/80 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                    </span>
+                    Live lane
+                  </span>
+                </div>
+                <div className="flex flex-1 flex-col gap-3 pb-2">
+                  {reels.map((item) => (
+                    <ReelCard
+                      key={item.id}
+                      item={item}
+                      isLatest={item.id === latestItemId}
+                      onOpen={setActiveItem}
+                      onRegisterView={registerView}
+                    />
+                  ))}
+                </div>
+              </aside>
+            </div>
+
+            {/* Mobile mixed feed */}
+            <div className="flex flex-col gap-3 lg:hidden">
+              {mobileFeedItems.map((item) => (
+                <MobileFeedItem
                   key={item.id}
                   item={item}
-                  isLatest={item.id === latestItemId}
-                  liveStatus={liveStatusLabel}
                   onOpen={setActiveItem}
                   onRegisterView={registerView}
                 />
               ))}
             </div>
-          </section>
-
-          {/* Right: Sticky reels feed - visually distinct with aqua stroke */}
-          <aside className="sticky top-24 flex h-[calc(100vh-8rem)] w-1/3 flex-col gap-3 overflow-y-auto rounded-3xl border border-cyan-400/60 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950/95 p-3 shadow-xl shadow-cyan-500/30">
-            <div className="mb-1 flex items-center justify-between px-1">
-              <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-300">
-                  Reels & Video Room
-                </p>
-                <p className="text-xs text-slate-400">
-                  Vertical-first edits, pinned in a dedicated lane.
-                </p>
-              </div>
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-200">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400/80 opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                </span>
-                Live lane
-              </span>
-            </div>
-            <div className="flex flex-1 flex-col gap-3 pb-2">
-              {reels.map((item) => (
-                <ReelCard
-                  key={item.id}
-                  item={item}
-                  isLatest={item.id === latestItemId}
-                  onOpen={setActiveItem}
-                  onRegisterView={registerView}
-                />
-              ))}
-            </div>
-          </aside>
-        </div>
-
-        {/* Mobile mixed feed */}
-        <div className="flex flex-col gap-3 lg:hidden">
-          {mobileFeedItems.map((item) => (
-            <MobileFeedItem
-              key={item.id}
-              item={item}
-              onOpen={setActiveItem}
-              onRegisterView={registerView}
-            />
-          ))}
-        </div>
+          </>
+        )}
 
 
         <AdminPanel onAddItem={handleAddItem} />

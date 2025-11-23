@@ -12,7 +12,7 @@ const {
     DRIVE_REELS_FOLDER_ID,
 } = process.env;
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
         const drive = google.drive({ version: 'v3', auth });
 
         // Helper to fetch files
-        const fetchFiles = async (folderId, type, layout = 'static') => {
+        const fetchFiles = async (folderId, type, defaultLayout = 'static') => {
             if (!folderId) return [];
 
             const q = `'${folderId}' in parents and trashed = false`;
@@ -43,36 +43,88 @@ export default async function handler(req, res) {
                 pageSize: 100,
             });
 
-            return (response.data.files || []).map(file => {
-                // Parse description for metadata if present (e.g. "Category | Subtitle")
-                let category = 'Social Design';
-                let subtitle = '';
+            const items = [];
 
-                if (file.description) {
-                    const parts = file.description.split('|');
-                    if (parts.length > 0) category = parts[0].trim();
-                    if (parts.length > 1) subtitle = parts[1].trim();
+            for (const file of (response.data.files || [])) {
+                // Check if it's a folder (Carousel/Series)
+                if (file.mimeType === 'application/vnd.google-apps.folder') {
+                    // Fetch children of this folder
+                    const childrenRes = await drive.files.list({
+                        q: `'${file.id}' in parents and trashed = false`,
+                        fields: 'files(id, name, mimeType, webContentLink, webViewLink)',
+                        orderBy: 'name', // Ensure slides are in order
+                        pageSize: 50,
+                    });
+
+                    const children = childrenRes.data.files || [];
+                    if (children.length === 0) continue; // Skip empty folders
+
+                    // Filter for media only
+                    const mediaChildren = children.filter(c => c.mimeType.startsWith('image/') || c.mimeType.startsWith('video/'));
+                    if (mediaChildren.length === 0) continue;
+
+                    const slides = mediaChildren.map(c => c.webContentLink || c.webViewLink);
+
+                    // Parse description from the FOLDER itself
+                    let category = 'Social Design';
+                    let subtitle = '';
+                    if (file.description) {
+                        const parts = file.description.split('|');
+                        if (parts.length > 0) category = parts[0].trim();
+                        if (parts.length > 1) subtitle = parts[1].trim();
+                    }
+
+                    items.push({
+                        id: file.id,
+                        type,
+                        category,
+                        title: file.name,
+                        subtitle,
+                        imageUrl: slides[0], // Cover image is the first slide
+                        slides, // Array of all slide URLs
+                        layout: 'carousel', // Force carousel layout for folders
+                        createdAt: file.createdTime,
+                        likes: 0,
+                        views: 0,
+                        isConceptArt: false
+                    });
+
+                } else {
+                    // It's a single file
+                    let category = 'Social Design';
+                    let subtitle = '';
+
+                    if (file.description) {
+                        const parts = file.description.split('|');
+                        if (parts.length > 0) category = parts[0].trim();
+                        if (parts.length > 1) subtitle = parts[1].trim();
+                    }
+
+                    const url = file.webContentLink || file.webViewLink;
+                    const isImage = file.mimeType.startsWith('image/');
+                    const isVideo = file.mimeType.startsWith('video/');
+
+                    if (!isImage && !isVideo) continue;
+
+                    items.push({
+                        id: file.id,
+                        type,
+                        category,
+                        title: file.name.replace(/\.[^/.]+$/, ""),
+                        subtitle,
+                        imageUrl: isImage ? url : undefined,
+                        videoUrl: isVideo ? url : undefined,
+                        slides: [url], // Single slide
+                        layout: defaultLayout,
+                        createdAt: file.createdTime,
+                        likes: 0,
+                        views: 0,
+                        isConceptArt: false
+                    });
                 }
+            }
 
-                // Use webContentLink (direct download) or fallback to webViewLink
-                // The frontend's normalizeMediaUrl will handle Drive links if needed
-                const url = file.webContentLink || file.webViewLink;
-
-                return {
-                    id: file.id,
-                    type,
-                    category,
-                    title: file.name.replace(/\.[^/.]+$/, ""), // remove extension
-                    subtitle,
-                    imageUrl: file.mimeType.startsWith('image/') ? url : undefined,
-                    videoUrl: file.mimeType.startsWith('video/') ? url : undefined,
-                    layout,
-                    createdAt: file.createdTime,
-                    likes: 0,
-                    views: 0,
-                    isConceptArt: false
-                };
-            });
+            return items;
         };
 
         // Fetch all
