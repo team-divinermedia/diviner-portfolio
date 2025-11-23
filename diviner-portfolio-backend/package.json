@@ -1,0 +1,11 @@
+{
+    "name": "diviner-portfolio-backend",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "start": "node api/portfolio-feed.js"
+    },
+    "dependencies": {
+        "googleapis": "^131.0.0"
+    }
+}

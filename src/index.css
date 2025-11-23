@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@theme {
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+:root {
+  color: #e2e8f0;
+  background-color: #05080f;
+}
+
+body {
+  min-height: 100vh;
+  color: #e2e8f0;
+  background:
+    radial-gradient(1200px circle at 15% 20%, rgba(94, 234, 212, 0.08), transparent 45%),
+    radial-gradient(900px circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 35%),
+    #05080f;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.marquee {
+  display: inline-flex;
+  width: max-content;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  animation: marquee 28s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
