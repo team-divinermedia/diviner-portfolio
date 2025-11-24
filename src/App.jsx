@@ -369,13 +369,11 @@ const generateAiItem = () => {
 
 // Normalize media URLs (e.g., Google Drive links -> direct download)
 // Normalize media URLs (e.g., Google Drive links -> direct download)
-const normalizeMediaUrl = (url, item) => {
+const normalizeMediaUrl = (url) => {
   if (!url) return "";
-
-  // If it's a reel video URL, return as-is (direct stream URL from backend)
-  if ((item?.type === "reel" || item?.format === "reel") && item?.videoUrl === url) {
-    return url;
-  }
+  // If it already looks like a Google Drive /uc link or /file/.../preview,
+  // just return it unchanged.
+  if (url.includes("drive.google.com")) return url;
 
   try {
     const parsed = new URL(url);
@@ -609,7 +607,7 @@ function ReelCard({ item, isLatest, onOpen, onRegisterView }) {
     onRegisterView?.(item.id);
   };
 
-  const coverSrc = normalizeMediaUrl(item.imageUrl, item);
+  const coverSrc = item.videoUrl || item.imageUrl || "";
 
   const handleImgError = (e) => {
     if (e.currentTarget.dataset.fallback) return;
@@ -617,6 +615,8 @@ function ReelCard({ item, isLatest, onOpen, onRegisterView }) {
     e.currentTarget.src =
       "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1200&q=80";
   };
+
+  const isReel = item.type === "reel";
 
   return (
     <article
@@ -626,14 +626,25 @@ function ReelCard({ item, isLatest, onOpen, onRegisterView }) {
     >
       <div className="relative">
         <div className="aspect-[9/16] w-full overflow-hidden bg-slate-900">
-          <img
-            src={coverSrc}
-            alt={item.title}
-            className="h-full w-full object-cover"
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            onError={handleImgError}
-          />
+          {isReel ? (
+            <video
+              src={item.videoUrl}
+              className="h-full w-full object-cover opacity-80"
+              playsInline
+              muted
+              loop
+              preload="metadata"
+            />
+          ) : (
+            <img
+              src={normalizeMediaUrl(item.imageUrl)}
+              alt={item.title}
+              className="h-full w-full object-cover"
+              loading="lazy"
+              referrerPolicy="no-referrer"
+              onError={handleImgError}
+            />
+          )}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur">
               <PlayCircle className="h-7 w-7 text-slate-50" />
@@ -939,15 +950,12 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const videoRef = useRef(null);
 
   const handleFullscreen = () => {
-    if (!videoRef.current) return;
     const el = videoRef.current;
+    if (!el) return;
     if (document.fullscreenElement) {
       document.exitFullscreen?.();
     } else {
-      el.requestFullscreen?.() ||
-        el.webkitRequestFullscreen?.() ||
-        el.mozRequestFullScreen?.() ||
-        el.msRequestFullscreen?.();
+      el.requestFullscreen?.();
     }
   };
 
@@ -1028,20 +1036,21 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
           {/* Media area */}
           <div className="flex-1 flex items-center justify-center">
             {isReel ? (
-              <div className="relative aspect-[9/16] h-full max-h-full overflow-hidden rounded-2xl border border-slate-700 bg-black">
+              <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-2xl border border-slate-700 bg-black">
                 <video
                   ref={videoRef}
-                  src={mediaSrc}
+                  src={item.videoUrl}
+                  className="h-full w-full object-contain bg-black"
                   controls
                   playsInline
-                  className="h-full w-full rounded-2xl bg-black object-contain"
+                  preload="metadata"
                 />
 
                 {/* Fullscreen button */}
                 <button
                   type="button"
                   onClick={handleFullscreen}
-                  className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-slate-50 backdrop-blur hover:bg-black/80"
+                  className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-slate-50 backdrop-blur hover:bg-black/80"
                 >
                   <Maximize className="h-3 w-3" />
                   <span>Fullscreen</span>
