@@ -12,6 +12,21 @@ const {
     DRIVE_REELS_FOLDER_ID,
 } = process.env;
 
+const WORK_START_HOUR = 10; // 10 AM
+const WORK_END_HOUR = 20;   // 8 PM (exclusive)
+
+const getLiveCountForNow = (items) => {
+    const now = new Date();
+    const hour = now.getHours();
+
+    if (hour < WORK_START_HOUR) return 0;
+    if (hour >= WORK_END_HOUR) return items.length;
+
+    const slotIndex = hour - WORK_START_HOUR; // 0-based
+    const liveCount = slotIndex + 1;
+    return Math.min(liveCount, items.length);
+};
+
 module.exports = async function handler(req, res) {
     // CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -137,10 +152,15 @@ module.exports = async function handler(req, res) {
 
         const items = [...posts, ...carousels, ...stories, ...reels];
 
-        // Sort by date desc
-        items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        // Sort by date asc (oldest first)
+        items.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
-        res.status(200).json({ items });
+        // Drip-feed based on working hours
+        const liveCount = getLiveCountForNow(items);
+        const liveItems = items.slice(0, liveCount);
+
+        res.setHeader("Cache-Control", "no-store");
+        res.status(200).json({ items: liveItems });
 
     } catch (error) {
         console.error('Drive API Error:', error);
