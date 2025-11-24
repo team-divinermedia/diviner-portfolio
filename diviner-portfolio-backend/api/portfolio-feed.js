@@ -121,14 +121,24 @@ module.exports = async function handler(req, res) {
 
                     if (!isImage && !isVideo) continue;
 
+                    let imageUrl = isImage ? url : undefined;
+                    let videoUrl = undefined;
+
+                    if (isVideo) {
+                        // For reels/videos, use the direct stream URL
+                        videoUrl = `https://drive.google.com/uc?export=download&id=${file.id}`;
+                        // Also set imageUrl as a fallback/thumbnail (Drive will redirect to a preview image often, or we use the videoUrl as src for img which might fail but we handle it on frontend)
+                        imageUrl = url;
+                    }
+
                     items.push({
                         id: file.id,
                         type,
                         category,
                         title: file.name.replace(/\.[^/.]+$/, ""),
                         subtitle,
-                        imageUrl: isImage ? url : undefined,
-                        videoUrl: isVideo ? url : undefined,
+                        imageUrl,
+                        videoUrl,
                         slides: [url], // Single slide
                         layout: defaultLayout,
                         createdAt: file.createdTime,

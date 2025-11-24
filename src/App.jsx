@@ -17,6 +17,7 @@ import {
   X,
   ArrowLeft,
   ArrowRight,
+  Maximize,
 } from "lucide-react";
 
 // Helper to generate recent timestamps
@@ -367,8 +368,15 @@ const generateAiItem = () => {
 };
 
 // Normalize media URLs (e.g., Google Drive links -> direct download)
-const normalizeMediaUrl = (url) => {
-  if (!url) return url;
+// Normalize media URLs (e.g., Google Drive links -> direct download)
+const normalizeMediaUrl = (url, item) => {
+  if (!url) return "";
+
+  // If it's a reel video URL, return as-is (direct stream URL from backend)
+  if ((item?.type === "reel" || item?.format === "reel") && item?.videoUrl === url) {
+    return url;
+  }
+
   try {
     const parsed = new URL(url);
     const host = parsed.hostname;
@@ -499,7 +507,7 @@ function MasonryItemCard({ item, isLatest, liveStatus, onOpen, onRegisterView })
         {item.type === "story" ? (
           <div className="relative w-full aspect-[9/16] overflow-hidden bg-slate-100">
             <img
-              src={normalizeMediaUrl(item.imageUrl)}
+              src={normalizeMediaUrl(item.imageUrl, item)}
               alt={item.title}
               className="h-full w-full object-cover"
               loading="lazy"
@@ -520,7 +528,7 @@ function MasonryItemCard({ item, isLatest, liveStatus, onOpen, onRegisterView })
         ) : (
           <div className="relative w-full overflow-hidden bg-slate-100">
             <img
-              src={normalizeMediaUrl(item.imageUrl)}
+              src={normalizeMediaUrl(item.imageUrl, item)}
               alt={item.title}
               className="w-full h-auto block"
               loading="lazy"
@@ -601,7 +609,7 @@ function ReelCard({ item, isLatest, onOpen, onRegisterView }) {
     onRegisterView?.(item.id);
   };
 
-  const coverSrc = normalizeMediaUrl(item.videoUrl || item.imageUrl);
+  const coverSrc = normalizeMediaUrl(item.imageUrl, item);
 
   const handleImgError = (e) => {
     if (e.currentTarget.dataset.fallback) return;
@@ -691,9 +699,7 @@ function MobileFeedItem({ item, onOpen, onRegisterView }) {
 
   const totalViews = item.totalViews ?? item.views ?? 0;
   const likes = item.likes ?? 0;
-  const mediaSrc = isReel
-    ? normalizeMediaUrl(item.videoUrl || item.imageUrl)
-    : normalizeMediaUrl(item.imageUrl);
+  const mediaSrc = normalizeMediaUrl(item.imageUrl, item);
   const handleImgError = (e) => {
     if (e.currentTarget.dataset.fallback) return;
     e.currentTarget.dataset.fallback = "true";
@@ -930,6 +936,20 @@ function FilterBar({
 function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
+  const videoRef = useRef(null);
+
+  const handleFullscreen = () => {
+    if (!videoRef.current) return;
+    const el = videoRef.current;
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+    } else {
+      el.requestFullscreen?.() ||
+        el.webkitRequestFullscreen?.() ||
+        el.mozRequestFullScreen?.() ||
+        el.msRequestFullscreen?.();
+    }
+  };
 
   if (!item) return null;
 
@@ -968,8 +988,8 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
     timeStyle: "short",
   });
   const mediaSrc = isReel
-    ? normalizeMediaUrl(item.videoUrl || item.imageUrl)
-    : normalizeMediaUrl(item.slides?.[currentSlide] || item.imageUrl);
+    ? normalizeMediaUrl(item.videoUrl, item)
+    : normalizeMediaUrl(item.slides?.[currentSlide] || item.imageUrl, item);
   const handleImgError = (e) => {
     if (e.currentTarget.dataset.fallback) return;
     e.currentTarget.dataset.fallback = "true";
@@ -1007,7 +1027,27 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
         <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 sm:flex-row sm:p-6">
           {/* Media area */}
           <div className="flex-1 flex items-center justify-center">
-            {item.type === "reel" || item.type === "story" ? (
+            {isReel ? (
+              <div className="relative aspect-[9/16] h-full max-h-full overflow-hidden rounded-2xl border border-slate-700 bg-black">
+                <video
+                  ref={videoRef}
+                  src={mediaSrc}
+                  controls
+                  playsInline
+                  className="h-full w-full rounded-2xl bg-black object-contain"
+                />
+
+                {/* Fullscreen button */}
+                <button
+                  type="button"
+                  onClick={handleFullscreen}
+                  className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-slate-50 backdrop-blur hover:bg-black/80"
+                >
+                  <Maximize className="h-3 w-3" />
+                  <span>Fullscreen</span>
+                </button>
+              </div>
+            ) : item.type === "story" ? (
               <div
                 className="relative mx-auto aspect-[9/16] max-h-full w-full max-w-sm overflow-hidden bg-black rounded-2xl"
                 onTouchStart={handleTouchStart}
@@ -1020,13 +1060,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
                   referrerPolicy="no-referrer"
                   onError={handleImgError}
                 />
-                {item.type === "reel" && (
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-black/60 backdrop-blur">
-                      <PlayCircle className="h-8 w-8 text-slate-50" />
-                    </div>
-                  </div>
-                )}
+
                 {canSlide && (
                   <>
                     <button
