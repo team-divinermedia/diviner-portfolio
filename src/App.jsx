@@ -914,6 +914,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
     e.currentTarget.src =
       "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1200&q=80";
   };
+  const canSlide = slideCount > 1;
 
   return (
     <div
@@ -964,6 +965,40 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
                     </div>
                   </div>
                 )}
+                {canSlide && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handlePrev}
+                      className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70"
+                    >
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                    <div className="sm:hidden absolute inset-x-0 bottom-2 flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handlePrev}
+                        className="h-10 w-10 rounded-full bg-black/50 text-white backdrop-blur flex items-center justify-center"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleNext}
+                        className="h-10 w-10 rounded-full bg-black/50 text-white backdrop-blur flex items-center justify-center"
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <div
@@ -979,7 +1014,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
                   onError={handleImgError}
                 />
 
-                {slideCount > 1 && (
+                {canSlide && (
                   <>
                     <button
                       type="button"
