@@ -773,7 +773,10 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
           {/* Media area */}
           <div className="flex-1 flex items-center justify-center">
             {isReel ? (
-              <div className="relative w-full max-w-[420px] aspect-[9/16] rounded-[32px] overflow-hidden bg-black">
+              <div
+                className="relative aspect-[9/16] rounded-[32px] overflow-hidden bg-black shadow-xl"
+                style={{ width: 'min(420px, 45vh)' }}
+              >
                 <iframe
                   src={item.videoUrl}
                   className="w-full h-full border-0"
