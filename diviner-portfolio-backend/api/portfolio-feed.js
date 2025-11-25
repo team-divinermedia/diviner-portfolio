@@ -122,7 +122,7 @@ module.exports = async function handler(req, res) {
                     if (!isImage && !isVideo) continue;
 
                     // Base Drive preview URL for videos
-                    const drivePreviewUrl = `https://drive.google.com/file/d/${file.id}/preview`;
+                    const driveVideoUrl = `https://drive.google.com/file/d/${file.id}/preview`;
 
                     // Keep existing webContentLink/webViewLink for images
                     const rawUrl = file.webContentLink || file.webViewLink || '';
@@ -134,8 +134,8 @@ module.exports = async function handler(req, res) {
                         title: file.name.replace(/\.[^/.]+$/, ""),
                         subtitle,
                         imageUrl: isImage ? rawUrl : undefined,
-                        videoUrl: isVideo ? drivePreviewUrl : undefined,
-                        slides: [isVideo ? drivePreviewUrl : rawUrl],
+                        videoUrl: isVideo ? driveVideoUrl : undefined,
+                        slides: [isVideo ? driveVideoUrl : rawUrl],
                         layout: defaultLayout,
                         createdAt: file.createdTime,
                         likes: 0,
