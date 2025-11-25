@@ -694,6 +694,7 @@ function FilterBar({
 function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
+  const videoRef = useRef(null);
   const isVideo = Boolean(item?.videoUrl);
 
   if (!item) return null;
@@ -749,7 +750,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
       onClick={onClose}
     >
       <div
-        className="flex max-h-full w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-slate-700 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-50 shadow-2xl shadow-slate-900/80"
+        className="flex w-full max-w-5xl max-h-[90vh] flex-col overflow-y-auto rounded-3xl border border-slate-700 bg-[#040817] text-slate-50 shadow-2xl shadow-slate-900/80"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3 sm:px-6">
@@ -770,18 +771,29 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
           </button>
         </div>
         <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 sm:flex-row sm:p-6">
-          {/* Media area */}
-          <section className="flex-1 flex items-center justify-center">
-            <div className="relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-3xl overflow-hidden flex items-center justify-center">
+          {/* Media area (left side of modal) */}
+          <div className="flex-1 flex items-center justify-center px-6 py-8">
+            <div
+              className="
+                relative
+                w-full
+                max-w-[420px]
+                aspect-[9/16]
+                max-h-[80vh]
+                rounded-[32px]
+                bg-black
+                overflow-hidden
+                shadow-xl
+              "
+            >
               {isReel && item.videoUrl ? (
-                <div className="relative w-full max-w-[420px] aspect-[9/16] overflow-hidden rounded-[32px] bg-[#050921]">
-                  <iframe
-                    src={item.videoUrl}
-                    className="absolute top-[-52px] left-0 w-full h-[calc(100%+52px)] border-0"
-                    allow="autoplay; encrypted-media; fullscreen"
-                    allowFullScreen
-                  />
-                </div>
+                <video
+                  ref={videoRef}
+                  src={item.videoUrl}
+                  className="h-full w-full object-contain"
+                  controls
+                  playsInline
+                />
               ) : item.imageUrl ? (
                 <img
                   src={item.imageUrl}
@@ -790,7 +802,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
                 />
               ) : null}
             </div>
-          </section>
+          </div>
           {isStory && (
             <div className="pointer-events-none absolute inset-x-4 top-4 flex items-center justify-between">
               <div className="flex flex-1 gap-1">
