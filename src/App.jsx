@@ -18,6 +18,9 @@ import {
   ArrowLeft,
   ArrowRight,
   Maximize,
+  Share2,
+  Link,
+  Check,
 } from "lucide-react";
 
 // Helper to generate recent timestamps
@@ -190,13 +193,15 @@ function Header({ onToggleFilters, isFilterOpen, liveStatus }) {
             </span>
           </div>
 
-          <button
-            type="button"
+          <a
+            href="https://wa.me/918347572000"
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 shadow-sm hover:border-slate-300 hover:bg-slate-50"
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>New project slot open</span>
-          </button>
+            <MessageCircle className="h-3.5 w-3.5" />
+            <span>Chat on WhatsApp</span>
+          </a>
 
           <button
             type="button"
@@ -352,6 +357,22 @@ function MasonryItemCard({ item, isLatest, liveStatus, onOpen, onRegisterView })
         </div>
       </div>
     </article>
+  );
+}
+
+
+
+function ReferralAnimation() {
+  return (
+    <div className="mt-4 flex h-12 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-800/40 px-4 text-xs font-medium shadow-sm animate-float-ui transition-all duration-500">
+      <div className="flex items-center gap-2">
+        <span className="relative flex h-1.5 w-1.5">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-75"></span>
+          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+        </span>
+        <span className="text-slate-200">Refer our work if you liked it!</span>
+      </div>
+    </div>
   );
 }
 
@@ -754,7 +775,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
         <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3 sm:px-6">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-              Piece overview
+              Creative Overview
             </p>
             <h2 className="text-sm font-semibold text-slate-50 sm:text-base">
               {item.title}
@@ -798,9 +819,9 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
               // Existing image layout for static posts/stories
               <div className="relative w-full max-w-[420px] rounded-[32px] overflow-hidden bg-black">
                 <img
-                  src={item.imageUrl}
+                  src={mediaSrc}
                   alt={item.title || 'Design piece'}
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto object-contain max-h-[80vh]"
                 />
               </div>
             )}
@@ -866,47 +887,37 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
                 <p className="text-[10px] text-slate-500">Engagement</p>
                 <p className="text-[11px] text-slate-100">
                   <span className="inline-flex items-center gap-1">
-                    <ThumbsUp className="h-3 w-3" /> {item.likes.toLocaleString()} likes
-                  </span>
-                </p>
-                <p className="text-[11px] text-slate-100">
-                  <span className="inline-flex items-center gap-1">
                     <Eye className="h-3 w-3" /> {item.totalViews.toLocaleString()} views
                   </span>
                 </p>
               </div>
             </div>
 
-            <div className="space-y-1">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
-                Meta
-              </p>
-              <dl className="space-y-1 text-[11px] text-slate-300">
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">ID</dt>
-                  <dd className="font-mono text-[10px] text-slate-300">#{item.id}</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Format</dt>
-                  <dd className="text-right">{item.type}</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Layout</dt>
-                  <dd className="text-right">{item.layout || "single"}</dd>
-                </div>
-                <div className="flex justify-between gap-2">
-                  <dt className="text-slate-500">Status</dt>
-                  <dd className="text-right">{isLatest ? liveStatus : "In production"}</dd>
-                </div>
-              </dl>
-            </div>
+            <ReferralAnimation />
 
-            <div className="mt-1 rounded-xl bg-slate-900/80 p-2 text-[11px] text-slate-300">
-              <p>
-                This view aggregates everything we track live for this piece: timing,
-                format, category, engagement and whether it&apos;s being surfaced in the
-                active feed right now.
-              </p>
+            <div className="mt-auto flex flex-col gap-2 pt-4">
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Check out this design: ${item.title}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#20bd5a] active:scale-95"
+              >
+                <Share2 className="h-3.5 w-3.5" />
+                Share on WhatsApp
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  const btn = document.getElementById('copy-btn-text');
+                  if (btn) btn.innerText = 'Copied!';
+                  setTimeout(() => { if (btn) btn.innerText = 'Copy Link'; }, 2000);
+                }}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-800/50 px-4 py-2.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-800 active:scale-95"
+              >
+                <Link className="h-3.5 w-3.5" />
+                <span id="copy-btn-text">Copy Link</span>
+              </button>
             </div>
           </aside>
         </div>
