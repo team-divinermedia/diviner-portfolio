@@ -121,11 +121,8 @@ module.exports = async function handler(req, res) {
                     // Skip non-media files
                     if (!isImage && !isVideo) continue;
 
-                    // Base Drive preview URL for videos
-                    const driveVideoUrl = `https://drive.google.com/file/d/${file.id}/preview`;
-
-                    // Keep existing webContentLink/webViewLink for images
                     const rawUrl = file.webContentLink || file.webViewLink || '';
+                    const driveVideoUrl = `https://drive.google.com/uc?export=download&id=${file.id}`;
 
                     items.push({
                         id: file.id,
