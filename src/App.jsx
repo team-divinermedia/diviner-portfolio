@@ -784,7 +784,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
               <div className="relative aspect-[9/16] h-full max-h-full overflow-hidden rounded-2xl border border-slate-700 bg-black">
                 <video
                   ref={videoRef}
-                  src={mediaSrc}
+                  src={item.videoUrl}
                   className="h-full w-full object-cover"
                   controls
                   autoPlay
