@@ -121,8 +121,11 @@ module.exports = async function handler(req, res) {
                     // Skip non-media files
                     if (!isImage && !isVideo) continue;
 
-                    const rawUrl = file.webContentLink || file.webViewLink || '';
+                    // Base Drive download URL for videos (raw file)
                     const driveVideoUrl = `https://drive.google.com/uc?export=download&id=${file.id}`;
+
+                    // Keep existing webContentLink/webViewLink for images
+                    const rawUrl = file.webContentLink || file.webViewLink || '';
 
                     items.push({
                         id: file.id,
@@ -137,7 +140,7 @@ module.exports = async function handler(req, res) {
                         createdAt: file.createdTime,
                         likes: 0,
                         views: 0,
-                        isConceptArt: false
+                        isConceptArt: false,
                     });
                 }
             }
