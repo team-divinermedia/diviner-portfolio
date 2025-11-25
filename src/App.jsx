@@ -698,11 +698,13 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const isVideo = Boolean(item?.videoUrl);
 
   const handleVideoFullscreen = () => {
-    const el = videoRef.current;
-    if (!el) return;
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    const iframe = videoRef.current;
+    if (!iframe) return;
+    if (iframe.requestFullscreen) {
+      iframe.requestFullscreen();
+    } else if (iframe.webkitRequestFullscreen) {
+      iframe.webkitRequestFullscreen();
+    }
   };
 
   if (!item) return null;
@@ -783,28 +785,28 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
           <section className="flex-1 flex items-center justify-center">
             <div className="relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-3xl overflow-hidden flex items-center justify-center">
               {isReel && item.videoUrl ? (
-                <>
-                  <video
-                    ref={videoRef}
+                <div className="relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-2xl overflow-hidden">
+                  <iframe
                     src={item.videoUrl}
-                    className="h-full w-full rounded-3xl object-contain bg-black"
-                    controls
-                    autoPlay
-                    playsInline
-                    loop
-                    muted
-                    controlsList="nodownload noremoteplayback"
-                    disablePictureInPicture
+                    allow="autoplay; fullscreen"
+                    className="w-full h-full border-0"
+                    loading="lazy"
+                    ref={videoRef}
                   />
+
+                  {/* Our custom fullscreen button (top-right) */}
                   <button
                     type="button"
                     onClick={handleVideoFullscreen}
-                    className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-slate-50 backdrop-blur hover:bg-black/80"
+                    className="absolute top-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs text-white flex items-center gap-1"
                   >
-                    <Maximize className="h-3 w-3" />
-                    <span>Fullscreen</span>
+                    <span className="inline-block h-2 w-2 rounded-full border border-white" />
+                    Fullscreen
                   </button>
-                </>
+
+                  {/* Overlay to block Drive's own "open in new" icon */}
+                  <div className="pointer-events-auto absolute top-0 right-0 h-10 w-10 bg-gradient-to-bl from-[#050b18] to-transparent" />
+                </div>
               ) : item.imageUrl ? (
                 <img
                   src={item.imageUrl}
