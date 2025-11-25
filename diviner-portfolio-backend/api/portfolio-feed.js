@@ -115,27 +115,24 @@ module.exports = async function handler(req, res) {
                         if (parts.length > 1) subtitle = parts[1].trim();
                     }
 
-                    const url = file.webContentLink || file.webViewLink;
                     const isImage = file.mimeType.startsWith('image/');
                     const isVideo = file.mimeType.startsWith('video/');
 
+                    // Skip non-media files
                     if (!isImage && !isVideo) continue;
 
-                    const buildDriveUrl = (file, isVideo) => {
-                        // Prefer the explicit file ID if present
-                        const id = file.id;
-                        if (!id) return file.webContentLink || file.webViewLink || '';
+                    let imageUrl;
+                    let videoUrl;
 
-                        // For images we want an inline view URL
-                        if (!isVideo) {
-                            return `https://drive.google.com/uc?export=view&id=${id}`;
-                        }
+                    if (isVideo) {
+                        // 🔴 IMPORTANT: use preview endpoint for streaming in <video>, not the download page
+                        videoUrl = `https://drive.google.com/uc?export=preview&id=${file.id}`;
+                    } else {
+                        // Images can safely use the normal content/view link
+                        imageUrl = file.webContentLink || file.webViewLink;
+                    }
 
-                        // For videos we want a direct/stream URL
-                        return `https://drive.google.com/uc?export=download&id=${id}`;
-                    };
-
-                    const mediaUrl = buildDriveUrl(file, isVideo);
+                    const primaryUrl = videoUrl || imageUrl;
 
                     items.push({
                         id: file.id,
@@ -143,9 +140,9 @@ module.exports = async function handler(req, res) {
                         category,
                         title: file.name.replace(/\.[^/.]+$/, ""),
                         subtitle,
-                        imageUrl: isImage ? mediaUrl : undefined,
-                        videoUrl: isVideo ? mediaUrl : undefined,
-                        slides: [mediaUrl],
+                        imageUrl,
+                        videoUrl,
+                        slides: [primaryUrl],         // first slide is the same media
                         layout: defaultLayout,
                         createdAt: file.createdTime,
                         likes: 0,
