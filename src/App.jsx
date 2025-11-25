@@ -694,8 +694,8 @@ function FilterBar({
 function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
-  const videoRef = useRef(null);
-  const isVideo = Boolean(item?.videoUrl);
+  const [touchStartX, setTouchStartX] = useState(null);
+  const isVideo = !isReel && !!item.videoUrl;
 
   if (!item) return null;
 
@@ -772,36 +772,37 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
         </div>
         <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 sm:flex-row sm:p-6">
           {/* Media area (left side of modal) */}
-          <div className="flex-1 flex items-center justify-center px-6 py-8">
-            <div
-              className="
-                relative
-                w-full
-                max-w-[420px]
-                aspect-[9/16]
-                max-h-[80vh]
-                rounded-[32px]
-                bg-black
-                overflow-hidden
-                shadow-xl
-              "
-            >
-              {isReel && item.videoUrl ? (
-                <video
-                  ref={videoRef}
+          {/* Media area */}
+          <div className="flex-1 flex items-center justify-center">
+            {isReel ? (
+              <div className="relative w-full max-w-[420px] aspect-[9/16] rounded-[32px] overflow-hidden bg-black">
+                <iframe
                   src={item.videoUrl}
-                  className="h-full w-full object-contain"
-                  controls
-                  playsInline
+                  className="w-full h-full border-0"
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+                  title={item.title || 'Reel video'}
                 />
-              ) : item.imageUrl ? (
+              </div>
+            ) : isVideo ? (
+              // Non-reel videos: keep a simple native <video>
+              <div className="relative w-full max-w-[420px] rounded-[32px] overflow-hidden bg-black">
+                <video
+                  src={item.videoUrl}
+                  className="w-full h-full object-contain"
+                  controls
+                />
+              </div>
+            ) : (
+              // Existing image layout for static posts/stories
+              <div className="relative w-full max-w-[420px] rounded-[32px] overflow-hidden bg-black">
                 <img
                   src={item.imageUrl}
-                  alt={item.title || "Design preview"}
-                  className="h-full w-full object-contain"
+                  alt={item.title || 'Design piece'}
+                  className="w-full h-full object-cover"
                 />
-              ) : null}
-            </div>
+              </div>
+            )}
           </div>
           {isStory && (
             <div className="pointer-events-none absolute inset-x-4 top-4 flex items-center justify-between">
