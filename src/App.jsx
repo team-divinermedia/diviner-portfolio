@@ -694,16 +694,7 @@ function FilterBar({
 function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
-  const videoRef = useRef(null);
   const isVideo = Boolean(item?.videoUrl);
-
-  const handleVideoFullscreen = () => {
-    const el = videoRef.current;
-    if (!el) return;
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.msRequestFullscreen) el.msRequestFullscreen();
-  };
 
   if (!item) return null;
 
@@ -780,29 +771,25 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
         </div>
         <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 sm:flex-row sm:p-6">
           {/* Media area */}
-          <div className="flex-1 flex items-center justify-center w-full h-auto min-h-[500px]">
-            {isVideo ? (
-              <iframe
-                src={item.videoUrl}
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                frameBorder="0"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  minHeight: '500px',
-                  borderRadius: '12px',
-                  background: '#000'
-                }}
-              ></iframe>
-            ) : (
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                style={{ width: '100%', borderRadius: '12px' }}
-              />
-            )}
-          </div>
+          <section className="flex-1 flex items-center justify-center">
+            <div className="relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-3xl overflow-hidden flex items-center justify-center">
+              {isReel && item.videoUrl ? (
+                <iframe
+                  src={item.videoUrl}
+                  className="w-full h-full border-0"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  loading="lazy"
+                />
+              ) : item.imageUrl ? (
+                <img
+                  src={item.imageUrl}
+                  alt={item.title || "Design preview"}
+                  className="h-full w-full object-contain"
+                />
+              ) : null}
+            </div>
+          </section>
           {isStory && (
             <div className="pointer-events-none absolute inset-x-4 top-4 flex items-center justify-between">
               <div className="flex flex-1 gap-1">
