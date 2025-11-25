@@ -155,12 +155,9 @@ module.exports = async function handler(req, res) {
         // Sort by date asc (oldest first)
         items.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
-        // Drip-feed based on working hours
-        const liveCount = getLiveCountForNow(items);
-        const liveItems = items.slice(0, liveCount);
-
+        // TEMP: show all items without time-based drip
         res.setHeader("Cache-Control", "no-store");
-        res.status(200).json({ items: liveItems });
+        res.status(200).json({ items });
 
     } catch (error) {
         console.error('Drive API Error:', error);
