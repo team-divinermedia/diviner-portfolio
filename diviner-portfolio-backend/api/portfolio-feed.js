@@ -121,15 +121,31 @@ module.exports = async function handler(req, res) {
 
                     if (!isImage && !isVideo) continue;
 
+                    const buildDriveUrl = (file, isVideo) => {
+                        // Prefer the explicit file ID if present
+                        const id = file.id;
+                        if (!id) return file.webContentLink || file.webViewLink || '';
+
+                        // For images we want an inline view URL
+                        if (!isVideo) {
+                            return `https://drive.google.com/uc?export=view&id=${id}`;
+                        }
+
+                        // For videos we want a direct/stream URL
+                        return `https://drive.google.com/uc?export=download&id=${id}`;
+                    };
+
+                    const mediaUrl = buildDriveUrl(file, isVideo);
+
                     items.push({
                         id: file.id,
                         type,
                         category,
                         title: file.name.replace(/\.[^/.]+$/, ""),
                         subtitle,
-                        imageUrl: isImage ? url : undefined,
-                        videoUrl: isVideo ? url : undefined,
-                        slides: [url], // Single slide
+                        imageUrl: isImage ? mediaUrl : undefined,
+                        videoUrl: isVideo ? mediaUrl : undefined,
+                        slides: [mediaUrl],
                         layout: defaultLayout,
                         createdAt: file.createdTime,
                         likes: 0,
