@@ -694,18 +694,7 @@ function FilterBar({
 function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
-  const videoRef = useRef(null);
   const isVideo = Boolean(item?.videoUrl);
-
-  const handleVideoFullscreen = () => {
-    const iframe = videoRef.current;
-    if (!iframe) return;
-    if (iframe.requestFullscreen) {
-      iframe.requestFullscreen();
-    } else if (iframe.webkitRequestFullscreen) {
-      iframe.webkitRequestFullscreen();
-    }
-  };
 
   if (!item) return null;
 
@@ -785,27 +774,13 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
           <section className="flex-1 flex items-center justify-center">
             <div className="relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-3xl overflow-hidden flex items-center justify-center">
               {isReel && item.videoUrl ? (
-                <div className="relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-2xl overflow-hidden">
+                <div className="relative w-full max-w-[420px] aspect-[9/16] overflow-hidden rounded-[32px] bg-[#050921]">
                   <iframe
                     src={item.videoUrl}
-                    allow="autoplay; fullscreen"
-                    className="w-full h-full border-0"
-                    loading="lazy"
-                    ref={videoRef}
+                    className="absolute top-[-52px] left-0 w-full h-[calc(100%+52px)] border-0"
+                    allow="autoplay; encrypted-media; fullscreen"
+                    allowFullScreen
                   />
-
-                  {/* Our custom fullscreen button (top-right) */}
-                  <button
-                    type="button"
-                    onClick={handleVideoFullscreen}
-                    className="absolute top-3 right-3 rounded-full bg-black/60 px-3 py-1 text-xs text-white flex items-center gap-1"
-                  >
-                    <span className="inline-block h-2 w-2 rounded-full border border-white" />
-                    Fullscreen
-                  </button>
-
-                  {/* Overlay to block Drive's own "open in new" icon */}
-                  <div className="pointer-events-auto absolute top-0 right-0 h-10 w-10 bg-gradient-to-bl from-[#050b18] to-transparent" />
                 </div>
               ) : item.imageUrl ? (
                 <img
