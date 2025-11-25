@@ -694,12 +694,10 @@ function FilterBar({
 function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
-  const [touchStartX, setTouchStartX] = useState(null);
-  const isVideo = !isReel && !!item.videoUrl;
-
   if (!item) return null;
 
   const isReel = item.type === "reel";
+  const isVideo = !isReel && !!item.videoUrl;
   const isCarousel = item.layout === "carousel" || (item.slides && item.slides.length > 1);
   const isStory = item.type === "story";
 

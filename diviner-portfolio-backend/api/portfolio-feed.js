@@ -123,8 +123,8 @@ module.exports = async function handler(req, res) {
 
                     const rawUrl = file.webContentLink || file.webViewLink || '';
 
-                    // Base Drive download URL for videos (raw file)
-                    const driveVideoUrl = `https://drive.google.com/uc?export=download&id=${file.id}`;
+                    // Base Drive preview URL for videos
+                    const previewUrl = `https://drive.google.com/file/d/${file.id}/preview`;
 
                     items.push({
                         id: file.id,
@@ -133,8 +133,8 @@ module.exports = async function handler(req, res) {
                         title: file.name.replace(/\.[^/.]+$/, ""),
                         subtitle,
                         imageUrl: isImage ? rawUrl : undefined,
-                        videoUrl: isVideo ? driveVideoUrl : undefined,
-                        slides: [isVideo ? driveVideoUrl : rawUrl],
+                        videoUrl: isVideo ? previewUrl : undefined,
+                        slides: [isVideo ? previewUrl : rawUrl],
                         layout: defaultLayout,
                         createdAt: file.createdTime,
                         likes: 0,
