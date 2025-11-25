@@ -694,7 +694,16 @@ function FilterBar({
 function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
+  const videoRef = useRef(null);
   const isVideo = Boolean(item?.videoUrl);
+
+  const handleVideoFullscreen = () => {
+    const el = videoRef.current;
+    if (!el) return;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.msRequestFullscreen) el.msRequestFullscreen();
+  };
 
   if (!item) return null;
 
@@ -774,13 +783,28 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
           <section className="flex-1 flex items-center justify-center">
             <div className="relative w-full max-w-[420px] aspect-[9/16] bg-black rounded-3xl overflow-hidden flex items-center justify-center">
               {isReel && item.videoUrl ? (
-                <iframe
-                  src={item.videoUrl}
-                  className="w-full h-full border-0"
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  loading="lazy"
-                />
+                <>
+                  <video
+                    ref={videoRef}
+                    src={item.videoUrl}
+                    className="h-full w-full rounded-3xl object-contain bg-black"
+                    controls
+                    autoPlay
+                    playsInline
+                    loop
+                    muted
+                    controlsList="nodownload noremoteplayback"
+                    disablePictureInPicture
+                  />
+                  <button
+                    type="button"
+                    onClick={handleVideoFullscreen}
+                    className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-slate-50 backdrop-blur hover:bg-black/80"
+                  >
+                    <Maximize className="h-3 w-3" />
+                    <span>Fullscreen</span>
+                  </button>
+                </>
               ) : item.imageUrl ? (
                 <img
                   src={item.imageUrl}
