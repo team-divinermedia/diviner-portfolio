@@ -121,18 +121,11 @@ module.exports = async function handler(req, res) {
                     // Skip non-media files
                     if (!isImage && !isVideo) continue;
 
-                    let imageUrl;
-                    let videoUrl;
+                    // Base Drive preview URL for videos
+                    const drivePreviewUrl = `https://drive.google.com/file/d/${file.id}/preview`;
 
-                    if (isVideo) {
-                        // 🔴 IMPORTANT: use preview endpoint for streaming in <video>, not the download page
-                        videoUrl = `https://drive.google.com/uc?export=preview&id=${file.id}`;
-                    } else {
-                        // Images can safely use the normal content/view link
-                        imageUrl = file.webContentLink || file.webViewLink;
-                    }
-
-                    const primaryUrl = videoUrl || imageUrl;
+                    // Keep existing webContentLink/webViewLink for images
+                    const rawUrl = file.webContentLink || file.webViewLink || '';
 
                     items.push({
                         id: file.id,
@@ -140,9 +133,9 @@ module.exports = async function handler(req, res) {
                         category,
                         title: file.name.replace(/\.[^/.]+$/, ""),
                         subtitle,
-                        imageUrl,
-                        videoUrl,
-                        slides: [primaryUrl],         // first slide is the same media
+                        imageUrl: isImage ? rawUrl : undefined,
+                        videoUrl: isVideo ? drivePreviewUrl : undefined,
+                        slides: [isVideo ? drivePreviewUrl : rawUrl],
                         layout: defaultLayout,
                         createdAt: file.createdTime,
                         likes: 0,
