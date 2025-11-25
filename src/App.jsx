@@ -695,6 +695,7 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStartX, setTouchStartX] = useState(null);
   const videoRef = useRef(null);
+  const isVideo = Boolean(item?.videoUrl);
 
   const handleVideoFullscreen = () => {
     const el = videoRef.current;
@@ -779,121 +780,27 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
         </div>
         <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 sm:flex-row sm:p-6">
           {/* Media area */}
-          <div className="flex-1 flex items-center justify-center">
-            {isReel ? (
-              <div className="relative aspect-[9/16] h-full max-h-full overflow-hidden rounded-2xl border border-slate-700 bg-black">
-                <video
-                  ref={videoRef}
-                  src={item.videoUrl}
-                  className="h-full w-full object-cover"
-                  controls
-                  autoPlay
-                  playsInline
-                  loop
-                  muted
-                />
-
-                {/* Fullscreen button */}
-                <button
-                  type="button"
-                  onClick={handleVideoFullscreen}
-                  className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-slate-50 backdrop-blur hover:bg-black/80"
-                >
-                  <Maximize className="h-3 w-3" />
-                  <span>Fullscreen</span>
-                </button>
-              </div>
-            ) : item.type === "story" ? (
-              <div
-                className="relative mx-auto aspect-[9/16] max-h-full w-full max-w-sm overflow-hidden bg-black rounded-2xl"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
-                <img
-                  src={mediaSrc}
-                  alt={item.title}
-                  className="h-full w-full object-cover"
-                  referrerPolicy="no-referrer"
-                  onError={handleImgError}
-                />
-
-                {canSlide && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handlePrev}
-                      className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70"
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNext}
-                      className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur hover:bg-black/70"
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                    <div className="sm:hidden absolute inset-x-0 bottom-2 flex items-center justify-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handlePrev}
-                        className="h-10 w-10 rounded-full bg-black/50 text-white backdrop-blur flex items-center justify-center"
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleNext}
-                        className="h-10 w-10 rounded-full bg-black/50 text-white backdrop-blur flex items-center justify-center"
-                      >
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+          <div className="flex-1 flex items-center justify-center w-full h-auto min-h-[500px]">
+            {isVideo ? (
+              <iframe
+                src={item.videoUrl}
+                allow="autoplay; fullscreen"
+                allowFullScreen
+                frameBorder="0"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  minHeight: '500px',
+                  borderRadius: '12px',
+                  background: '#000'
+                }}
+              ></iframe>
             ) : (
-              <div
-                className="relative mx-auto w-full max-w-xl max-h-full overflow-hidden bg-black rounded-2xl"
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-              >
-                <img
-                  src={mediaSrc}
-                  alt={item.title}
-                  className="h-full w-full object-contain"
-                  referrerPolicy="no-referrer"
-                  onError={handleImgError}
-                />
-
-                {canSlide && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handlePrev}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-slate-50 backdrop-blur hover:bg-black/70"
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNext}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-slate-50 backdrop-blur hover:bg-black/70"
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                    <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
-                      {Array.from({ length: slideCount }).map((_, idx) => (
-                        <span
-                          key={idx}
-                          className={`h-0.5 rounded-full transition-all ${idx === currentSlide ? "w-5 bg-orange-400" : "w-3 bg-slate-500/60"
-                            }`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
+              <img
+                src={item.imageUrl}
+                alt={item.title}
+                style={{ width: '100%', borderRadius: '12px' }}
+              />
             )}
           </div>
           {isStory && (
