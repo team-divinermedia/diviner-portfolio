@@ -28,244 +28,7 @@ const minutesAgo = (mins) => {
 };
 
 // Base mock items without the Concept Art tag
-const BASE_MOCK_ITEMS = [
-  {
-    id: 1,
-    type: "post",
-    category: "Brand Identity",
-    title: "Cold Brew Brand Grid",
-    subtitle: "Instagram carousel for a coffee startup.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=1000&q=80",
-    layout: "carousel",
-    createdAt: minutesAgo(130), // Simulating a 2h 10m gap
-    likes: 420,
-    views: 1800,
-  },
-  {
-    id: 2,
-    type: "post",
-    category: "Social Design",
-    title: "Quarterly Launch Highlights",
-    subtitle: "Static post series for SaaS dashboard.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1000&q=80",
-    layout: "static",
-    createdAt: minutesAgo(12),
-    likes: 310,
-    views: 1320,
-  },
-  {
-    id: 3,
-    type: "story",
-    category: "Story Series",
-    title: "D2C Skincare Launch Story",
-    subtitle: "9:16 story pack with CTA frames.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?auto=format&fit=crop&w=900&q=80",
-    layout: "story",
-    createdAt: minutesAgo(22),
-    likes: 280,
-    views: 980,
-  },
-  {
-    id: 4,
-    type: "reel",
-    category: "Reel / Short",
-    title: "Before / After Brand Glow-Up",
-    subtitle: "Vertical reel edit with motion graphics.",
-    videoUrl:
-      "https://images.unsplash.com/photo-1516031190212-da133013de50?auto=format&fit=crop&w=900&q=80",
-    createdAt: minutesAgo(28),
-    likes: 960,
-    views: 4200,
-  },
-  {
-    id: 5,
-    type: "post",
-    category: "Carousel",
-    title: "Founder Story Swipe Series",
-    subtitle: "Carousel optimized for LinkedIn & Instagram.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=1100&q=80",
-    layout: "carousel",
-    createdAt: minutesAgo(35),
-    likes: 510,
-    views: 2100,
-  },
-  {
-    id: 6,
-    type: "post",
-    category: "Ad Creative",
-    title: "Performance Ad Variations",
-    subtitle: "A/B test-ready static ad set.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1100&q=80",
-    layout: "static",
-    createdAt: minutesAgo(48),
-    likes: 640,
-    views: 2600,
-  },
-  {
-    id: 7,
-    type: "story",
-    category: "Story Series",
-    title: "Launch Countdown Story Kit",
-    subtitle: "Teasers, countdown & reveal frames.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=900&q=80",
-    layout: "story",
-    createdAt: minutesAgo(60),
-    likes: 330,
-    views: 1120,
-  },
-  {
-    id: 8,
-    type: "reel",
-    category: "Reel / Short",
-    title: "UI Animation Teaser",
-    subtitle: "App walkthrough with smooth micro-interactions.",
-    videoUrl:
-      "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1000&q=80",
-    createdAt: minutesAgo(72),
-    likes: 870,
-    views: 3890,
-  },
-  {
-    id: 9,
-    type: "post",
-    category: "Case Study",
-    title: "30-Day Content Sprint",
-    subtitle: "Results-focused carousel breakdown.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1100&q=80",
-    layout: "carousel",
-    createdAt: minutesAgo(95),
-    likes: 720,
-    views: 3050,
-  },
-  {
-    id: 10,
-    type: "reel",
-    category: "Reel / Short",
-    title: "Client Testimonial Snippets",
-    subtitle: "Vertical testimonial edit with subtitles.",
-    videoUrl:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80",
-    createdAt: minutesAgo(120),
-    likes: 690,
-    views: 2760,
-  },
-  {
-    id: 11,
-    type: "post",
-    category: "Grid Design",
-    title: "Minimal Agency Grid",
-    subtitle: "3x3 grid for Instagram home feed.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=1100&q=80",
-    layout: "static",
-    createdAt: minutesAgo(180),
-    likes: 410,
-    views: 1540,
-  },
-  {
-    id: 12,
-    type: "story",
-    category: "Story Series",
-    title: "Template Pack Story Preview",
-    subtitle: "Story launch for Notion + Canva pack.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1000&q=80",
-    layout: "story",
-    createdAt: minutesAgo(210),
-    likes: 295,
-    views: 970,
-  },
-  {
-    id: 13,
-    type: "reel",
-    category: "Reel / Short",
-    title: "Logo Reveal Animation",
-    subtitle: "Short logo sting with sound design.",
-    videoUrl:
-      "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1000&q=80",
-    createdAt: minutesAgo(260),
-    likes: 820,
-    views: 3420,
-  },
-  {
-    id: 14,
-    type: "post",
-    category: "Social Design",
-    title: "Product Drop Announcement",
-    subtitle: "Static drop announcement for streetwear brand.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1100&q=80",
-    layout: "static",
-    createdAt: minutesAgo(300),
-    likes: 540,
-    views: 2210,
-  },
-  {
-    id: 15,
-    type: "reel",
-    category: "Reel / Short",
-    title: "Behind-the-Scenes Snippets",
-    subtitle: "Studio BTS cuts for Instagram Reels.",
-    videoUrl:
-      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1000&q=80",
-    createdAt: minutesAgo(360),
-    likes: 760,
-    views: 2980,
-  },
-];
 
-// Logic to inject auto-generated content if gap > 2 hours (10 AM - 8 PM)
-const injectAutoGeneratedContent = (items) => {
-  const now = new Date();
-  const hour = now.getHours();
-
-  // Only run between 10 AM and 8 PM
-  if (hour < 10 || hour >= 20) return items;
-
-  const latestItem = items[0];
-  if (!latestItem) return items;
-
-  const latestTime = new Date(latestItem.createdAt);
-  const diffMs = now - latestTime;
-  const diffMins = Math.round(diffMs / 60000);
-
-  // If gap is greater than 120 minutes (2 hours)
-  if (diffMins > 120) {
-    const autoItem = {
-      id: "auto-ai-1",
-      type: "post",
-      category: "Concept Art",
-      title: "Auto-Generated Concept",
-      subtitle: "AI filling the gap to keep the feed alive.",
-      imageUrl:
-        "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=1000&q=80", // AI/Abstract image
-      layout: "static",
-      createdAt: minutesAgo(0), // Just now
-      likes: 0,
-      views: 0,
-      isConceptArt: true,
-    };
-    return [autoItem, ...items];
-  }
-
-  return items;
-};
-
-// Enhance with a random 10% "Concept Art" tag to simulate AI generated backup
-// And apply auto-post logic
-const MOCK_ITEMS = injectAutoGeneratedContent(
-  BASE_MOCK_ITEMS.map((item) => ({
-    ...item,
-    isConceptArt: Math.random() < 0.1,
-  }))
-);
 
 const getLiveStatusLabel = () => {
   const now = new Date();
@@ -368,13 +131,8 @@ const generateAiItem = () => {
 };
 
 // Normalize media URLs (e.g., Google Drive links -> direct download)
-// Normalize media URLs (e.g., Google Drive links -> direct download)
 const normalizeMediaUrl = (url) => {
-  if (!url) return "";
-  // If it already looks like a Google Drive /uc link or /file/.../preview,
-  // just return it unchanged.
-  if (url.includes("drive.google.com")) return url;
-
+  if (!url) return url;
   try {
     const parsed = new URL(url);
     const host = parsed.hostname;
@@ -505,7 +263,7 @@ function MasonryItemCard({ item, isLatest, liveStatus, onOpen, onRegisterView })
         {item.type === "story" ? (
           <div className="relative w-full aspect-[9/16] overflow-hidden bg-slate-100">
             <img
-              src={normalizeMediaUrl(item.imageUrl, item)}
+              src={normalizeMediaUrl(item.imageUrl)}
               alt={item.title}
               className="h-full w-full object-cover"
               loading="lazy"
@@ -526,7 +284,7 @@ function MasonryItemCard({ item, isLatest, liveStatus, onOpen, onRegisterView })
         ) : (
           <div className="relative w-full overflow-hidden bg-slate-100">
             <img
-              src={normalizeMediaUrl(item.imageUrl, item)}
+              src={normalizeMediaUrl(item.imageUrl)}
               alt={item.title}
               className="w-full h-auto block"
               loading="lazy"
@@ -607,7 +365,7 @@ function ReelCard({ item, isLatest, onOpen, onRegisterView }) {
     onRegisterView?.(item.id);
   };
 
-  const coverSrc = item.videoUrl || item.imageUrl || "";
+  const coverSrc = normalizeMediaUrl(item.videoUrl || item.imageUrl);
 
   const handleImgError = (e) => {
     if (e.currentTarget.dataset.fallback) return;
@@ -615,8 +373,6 @@ function ReelCard({ item, isLatest, onOpen, onRegisterView }) {
     e.currentTarget.src =
       "https://images.unsplash.com/photo-1526498460520-4c246339dccb?auto=format&fit=crop&w=1200&q=80";
   };
-
-  const isReel = item.type === "reel";
 
   return (
     <article
@@ -626,25 +382,14 @@ function ReelCard({ item, isLatest, onOpen, onRegisterView }) {
     >
       <div className="relative">
         <div className="aspect-[9/16] w-full overflow-hidden bg-slate-900">
-          {isReel ? (
-            <video
-              src={item.videoUrl}
-              className="h-full w-full object-cover opacity-80"
-              playsInline
-              muted
-              loop
-              preload="metadata"
-            />
-          ) : (
-            <img
-              src={normalizeMediaUrl(item.imageUrl)}
-              alt={item.title}
-              className="h-full w-full object-cover"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              onError={handleImgError}
-            />
-          )}
+          <img
+            src={coverSrc}
+            alt={item.title}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={handleImgError}
+          />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur">
               <PlayCircle className="h-7 w-7 text-slate-50" />
@@ -710,7 +455,9 @@ function MobileFeedItem({ item, onOpen, onRegisterView }) {
 
   const totalViews = item.totalViews ?? item.views ?? 0;
   const likes = item.likes ?? 0;
-  const mediaSrc = normalizeMediaUrl(item.imageUrl, item);
+  const mediaSrc = isReel
+    ? normalizeMediaUrl(item.videoUrl || item.imageUrl)
+    : normalizeMediaUrl(item.imageUrl);
   const handleImgError = (e) => {
     if (e.currentTarget.dataset.fallback) return;
     e.currentTarget.dataset.fallback = "true";
@@ -949,14 +696,12 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
   const [touchStartX, setTouchStartX] = useState(null);
   const videoRef = useRef(null);
 
-  const handleFullscreen = () => {
+  const handleVideoFullscreen = () => {
     const el = videoRef.current;
     if (!el) return;
-    if (document.fullscreenElement) {
-      document.exitFullscreen?.();
-    } else {
-      el.requestFullscreen?.();
-    }
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    else if (el.msRequestFullscreen) el.msRequestFullscreen();
   };
 
   if (!item) return null;
@@ -996,8 +741,8 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
     timeStyle: "short",
   });
   const mediaSrc = isReel
-    ? normalizeMediaUrl(item.videoUrl, item)
-    : normalizeMediaUrl(item.slides?.[currentSlide] || item.imageUrl, item);
+    ? normalizeMediaUrl(item.videoUrl || item.imageUrl)
+    : normalizeMediaUrl(item.slides?.[currentSlide] || item.imageUrl);
   const handleImgError = (e) => {
     if (e.currentTarget.dataset.fallback) return;
     e.currentTarget.dataset.fallback = "true";
@@ -1036,21 +781,23 @@ function ItemModal({ item, isLatest, liveStatus, onClose }) {
           {/* Media area */}
           <div className="flex-1 flex items-center justify-center">
             {isReel ? (
-              <div className="aspect-[9/16] h-full max-h-full overflow-hidden rounded-2xl border border-slate-700 bg-black">
+              <div className="relative aspect-[9/16] h-full max-h-full overflow-hidden rounded-2xl border border-slate-700 bg-black">
                 <video
                   ref={videoRef}
-                  src={item.videoUrl}
-                  className="h-full w-full object-contain bg-black"
+                  src={mediaSrc}
+                  className="h-full w-full object-cover"
                   controls
+                  autoPlay
                   playsInline
-                  preload="metadata"
+                  loop
+                  muted
                 />
 
                 {/* Fullscreen button */}
                 <button
                   type="button"
-                  onClick={handleFullscreen}
-                  className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-slate-50 backdrop-blur hover:bg-black/80"
+                  onClick={handleVideoFullscreen}
+                  className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-[10px] font-medium text-slate-50 backdrop-blur hover:bg-black/80"
                 >
                   <Maximize className="h-3 w-3" />
                   <span>Fullscreen</span>
@@ -1280,11 +1027,11 @@ function App() {
           setFeedItems(data.items);
         } else {
           // 🔁 Fallback only when API has nothing
-          setFeedItems(MOCK_ITEMS);
+          setFeedItems([]);
         }
       } catch (err) {
         console.error("Failed to load portfolio feed:", err);
-        setFeedItems(MOCK_ITEMS);
+        setFeedItems([]);
       } finally {
         setLoading(false);
       }
